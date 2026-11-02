@@ -1220,7 +1220,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       if (controlsUnlock) {
         if (!plPlayerController.isLive) {
           _doubleTapGestureRecognizer.addPointer(event);
-          if (!Platform.isAndroid) {
+          if (plPlayerController.enableLongPressSpeed) {
             longPressRecognizer.addPointer(event);
           }
         }
@@ -1234,7 +1234,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       } else {
         _tapGestureRecognizer.addPointer(event);
         _doubleTapGestureRecognizer.addPointer(event);
-        longPressRecognizer.addPointer(event);
+        if (plPlayerController.enableLongPressSpeed) {
+          longPressRecognizer.addPointer(event);
+        }
       }
       _scaleGestureRecognizer.addPointer(event);
     }
@@ -1375,7 +1377,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           ),
 
         /// 长按倍速 toast
-        if (!Platform.isAndroid && !isLive)
+        if (!isLive)
           IgnorePointer(
             ignoring: true,
             child: Align(

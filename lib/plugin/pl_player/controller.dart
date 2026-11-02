@@ -422,6 +422,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   late final RxDouble danmakuOpacity = Pref.danmakuOpacity.obs;
 
   late List<double> speedList = Pref.speedList;
+  late bool enableLongPressSpeed = Pref.enableLongPressSpeed;
   late bool enableAutoLongPressSpeed = Pref.enableAutoLongPressSpeed;
   late final showControlDuration = Pref.enableLongShowControl
       ? const Duration(seconds: 30)
@@ -1371,7 +1372,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   /// 设置长按倍速状态 live模式下禁用
   Future<void> setLongPressStatus(bool val) async {
-    if (Platform.isAndroid || isLive) {
+    if (isLive) {
+      return;
+    }
+    if (val && !enableLongPressSpeed) {
       return;
     }
     if (controlsLock.value) {

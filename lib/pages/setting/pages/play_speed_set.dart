@@ -1,10 +1,10 @@
-import 'dart:io' show Platform;
 import 'dart:math';
 
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
 import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/view_safe_area.dart';
 import 'package:PiliPlus/pages/setting/widgets/switch_item.dart';
+import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/utils/extension/context_ext.dart';
 import 'package:PiliPlus/utils/filtering_text.dart';
 import 'package:PiliPlus/utils/storage.dart';
@@ -26,6 +26,7 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
   late double playSpeedDefault = Pref.playSpeedDefault;
   late double longPressSpeedDefault = Pref.longPressSpeedDefault;
   late List<double> speedList = Pref.speedList;
+  late bool enableLongPressSpeed = Pref.enableLongPressSpeed;
   late bool enableAutoLongPressSpeed = Pref.enableAutoLongPressSpeed;
   List<({int id, String title, Icon icon})> sheetMenu = [
     (
@@ -36,15 +37,14 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
         size: 21,
       ),
     ),
-    if (!Platform.isAndroid)
-      (
-        id: 2,
-        title: '设置为默认长按倍速',
-        icon: const Icon(
-          Icons.speed_sharp,
-          size: 21,
-        ),
+    (
+      id: 2,
+      title: '设置为默认长按倍速',
+      icon: const Icon(
+        Icons.speed_sharp,
+        size: 21,
       ),
+    ),
     (
       id: -1,
       title: '删除该项',
@@ -131,7 +131,8 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
             const SizedBox(height: 10),
             ...sheetMenu.map(
               (item) => ListTile(
-                enabled: enableAutoLongPressSpeed && item.id == 2
+                enabled: (!enableLongPressSpeed || enableAutoLongPressSpeed) &&
+                        item.id == 2
                     ? false
                     : true,
                 onTap: () {
@@ -170,7 +171,7 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
       if ([
         1.0,
         playSpeedDefault,
-        if (!Platform.isAndroid) longPressSpeedDefault,
+        longPressSpeedDefault,
       ].contains(speed)) {
         SmartDialog.showToast('不支持删除默认倍速');
         return;
@@ -213,7 +214,7 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
                 bottom: 0,
               ),
               child: Text(
-                Platform.isAndroid ? '点击下方按钮设置默认倍速' : '点击下方按钮设置默认（长按）倍速',
+                '点击下方按钮设置默认（长按）倍速',
                 style: TextStyle(color: theme.colorScheme.outline),
               ),
             ),
@@ -221,14 +222,26 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
               title: const Text('默认倍速'),
               subtitle: Text(playSpeedDefault.toString()),
             ),
-            if (!Platform.isAndroid) ...[
+            SetSwitchItem(
+              title: '长按倍速',
+              subtitle: '长按视频快进倍速播放',
+              setKey: SettingBoxKey.enableLongPressSpeed,
+              defaultVal: enableLongPressSpeed,
+              onChanged: (val) {
+                PlPlayerController.instance?.enableLongPressSpeed = val;
+                setState(() => enableLongPressSpeed = val);
+              },
+            ),
+            if (enableLongPressSpeed) ...[
               SetSwitchItem(
                 title: '动态长按倍速',
                 subtitle: '根据默认倍速长按时自动双倍',
                 setKey: SettingBoxKey.enableAutoLongPressSpeed,
                 defaultVal: enableAutoLongPressSpeed,
-                onChanged: (val) =>
-                    setState(() => enableAutoLongPressSpeed = val),
+                onChanged: (val) {
+                  PlPlayerController.instance?.enableAutoLongPressSpeed = val;
+                  setState(() => enableAutoLongPressSpeed = val);
+                },
               ),
               if (!enableAutoLongPressSpeed)
                 ListTile(
