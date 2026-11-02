@@ -1371,7 +1371,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
 
   /// 设置长按倍速状态 live模式下禁用
   Future<void> setLongPressStatus(bool val) async {
-    if (isLive) {
+    if (Platform.isAndroid || isLive) {
       return;
     }
     if (controlsLock.value) {

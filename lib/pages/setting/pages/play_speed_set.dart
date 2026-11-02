@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'dart:math';
 
 import 'package:PiliPlus/common/widgets/flutter/list_tile.dart';
@@ -35,14 +36,15 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
         size: 21,
       ),
     ),
-    (
-      id: 2,
-      title: '设置为默认长按倍速',
-      icon: const Icon(
-        Icons.speed_sharp,
-        size: 21,
+    if (!Platform.isAndroid)
+      (
+        id: 2,
+        title: '设置为默认长按倍速',
+        icon: const Icon(
+          Icons.speed_sharp,
+          size: 21,
+        ),
       ),
-    ),
     (
       id: -1,
       title: '删除该项',
@@ -168,7 +170,7 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
       if ([
         1.0,
         playSpeedDefault,
-        longPressSpeedDefault,
+        if (!Platform.isAndroid) longPressSpeedDefault,
       ].contains(speed)) {
         SmartDialog.showToast('不支持删除默认倍速');
         return;
@@ -211,7 +213,7 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
                 bottom: 0,
               ),
               child: Text(
-                '点击下方按钮设置默认（长按）倍速',
+                Platform.isAndroid ? '点击下方按钮设置默认倍速' : '点击下方按钮设置默认（长按）倍速',
                 style: TextStyle(color: theme.colorScheme.outline),
               ),
             ),
@@ -219,19 +221,21 @@ class _PlaySpeedPageState extends State<PlaySpeedPage> {
               title: const Text('默认倍速'),
               subtitle: Text(playSpeedDefault.toString()),
             ),
-            SetSwitchItem(
-              title: '动态长按倍速',
-              subtitle: '根据默认倍速长按时自动双倍',
-              setKey: SettingBoxKey.enableAutoLongPressSpeed,
-              defaultVal: enableAutoLongPressSpeed,
-              onChanged: (val) =>
-                  setState(() => enableAutoLongPressSpeed = val),
-            ),
-            if (!enableAutoLongPressSpeed)
-              ListTile(
-                title: const Text('默认长按倍速'),
-                subtitle: Text(longPressSpeedDefault.toString()),
+            if (!Platform.isAndroid) ...[
+              SetSwitchItem(
+                title: '动态长按倍速',
+                subtitle: '根据默认倍速长按时自动双倍',
+                setKey: SettingBoxKey.enableAutoLongPressSpeed,
+                defaultVal: enableAutoLongPressSpeed,
+                onChanged: (val) =>
+                    setState(() => enableAutoLongPressSpeed = val),
               ),
+              if (!enableAutoLongPressSpeed)
+                ListTile(
+                  title: const Text('默认长按倍速'),
+                  subtitle: Text(longPressSpeedDefault.toString()),
+                ),
+            ],
             Padding(
               padding: const EdgeInsets.only(
                 left: 14,

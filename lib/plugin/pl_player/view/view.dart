@@ -1220,7 +1220,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
       if (controlsUnlock) {
         if (!plPlayerController.isLive) {
           _doubleTapGestureRecognizer.addPointer(event);
-          longPressRecognizer.addPointer(event);
+          if (!Platform.isAndroid) {
+            longPressRecognizer.addPointer(event);
+          }
         }
         _scaleGestureRecognizer
           ..isPosAllowed = _isPositionAllowed(event.localPosition)
@@ -1373,7 +1375,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           ),
 
         /// 长按倍速 toast
-        if (!isLive)
+        if (!Platform.isAndroid && !isLive)
           IgnorePointer(
             ignoring: true,
             child: Align(
